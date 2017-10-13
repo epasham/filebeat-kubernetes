@@ -1,0 +1,60 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: logging-filebeat
+  namespace: default
+  labels:
+    name: logging-filebeat
+spec:
+  template:
+    metadata:
+      labels:
+        name: logging-filebeat
+      name: logging-filebeat
+    spec:
+      containers:
+      - name: filebeat
+        image: filebeat:latest
+        env:
+            - name: LOGSTASH_HOSTS
+              value:  logstash.default.svc.cluster.local:5044
+        resources:
+          requests:
+            cpu: 50m
+            memory: 50Mi
+          limits:
+            cpu: 50m
+            memory: 100Mi
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/filebeat
+        - name: varlogcontainers
+          mountPath: /var/log/containers
+        - name: varlogpods
+          mountPath: /var/log/pods
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+      terminationGracePeriodSeconds: 30
+      volumes:
+      # mount /var/log/containers to get friendly named symlinks to actual logs
+      - name: varlogcontainers
+        hostPath:
+          path: /var/log/containers
+      # mount /var/log/pods as its where pod logs are collected
+      - name: varlogpods
+        hostPath:
+          path: /var/log/pods
+      # mount /var/lib/docker/containers which is where the logs _actually_ are
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      # mount the configmap with the filebeat config file
+      - name: config-volume
+        configMap:
+          name: logging-cfg
+          items:
+            - key: filebeat.yml
+              path: filebeat.yml
