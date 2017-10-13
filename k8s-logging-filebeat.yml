@@ -14,10 +14,10 @@ spec:
     spec:
       containers:
       - name: filebeat
-        image: docker.elastic.co/beats/filebeat:5.3.2
+        image: apsops/filebeat-kubernetes
         env:
-            - name: LOGSTASH_HOSTS
-              value:  logstash.default.svc.cluster.local:5044
+          - name: LOGSTASH_HOSTS
+            value:  logstash.default.svc.cluster.local:5044
         resources:
           requests:
             cpu: 50m
