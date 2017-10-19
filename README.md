@@ -49,6 +49,8 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
         volumeMounts:
+        - name: config-volume
+          mountPath: /etc/filebeat
         - name: varlog
           mountPath: /var/log/containers
         - name: varlogpods
@@ -62,6 +64,12 @@ spec:
       - key: node-role.kubernetes.io/master
         effect: NoSchedule
       volumes:
+      - name: config-volume
+        configMap:
+          name: logging-cfg
+          items:
+            - key: filebeat.yml
+              path: filebeat.yml
       - name: varlog
         hostPath:
           path: /var/log/containers
