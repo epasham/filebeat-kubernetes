@@ -17,10 +17,13 @@ data:
       json.message_key: log
       multiline.pattern: '^\s'
       multiline.match: after
-      document_type: kube-logs   
+      document_type: kube-logs
+      fields:
+        host: ${FILEBEAT_HOST:${HOSTNAME}}
+      fields_under_root: true
 
     output.logstash:
       hosts: ${LOGSTASH_HOSTS:?No logstash host configured. Use env var LOGSTASH_HOSTS to set hosts.}
       timeout: 15
     # Available log levels are: critical, error, warning, info, debug
-    logging.level: info
+    logging.level: ${LOG_LEVEL:error}
